@@ -17,7 +17,8 @@ This backend application demonstrates how to build and structure APIs using **Ja
 
 ## 🛠️ Tech Stack  
 - **Java 17+**  
-- **Spring Boot** (REST, Data JPA)  
+- **Spring Boot** (REST, Data JPA)
+- - **HTML, CSS, JavaScript
 - **Hibernate/JPA**  
 - **MySQL** (or H2 for in-memory testing)  
 - **Maven** (build tool)  
