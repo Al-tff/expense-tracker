@@ -1,2 +1,27 @@
-# expense-tracker
-Backend project demonstrating RESTful API development with Spring Boot and Maven. Features expense management, database persistence, and clean architecture
+# Expense Tracker REST API  
+
+A **Spring Boot REST API** project for managing personal expenses.  
+This backend application demonstrates how to build and structure APIs using **Java, Maven, Hibernate/JPA, and MySQL**, with clean and maintainable code practices.  
+
+---
+
+## Features  
+- ➕ Add, update, and delete expenses  
+- 📂 Categorize expenses (Food, Travel, Bills, etc.)  
+- 📊 View all expenses or filter by category/date  
+- 🔍 Retrieve a single expense by ID  
+- 🗄️ Database persistence with MySQL & JPA/Hibernate  
+- 🌱 REST API design following best practices  
+
+---
+
+## 🛠️ Tech Stack  
+- **Java 17+**  
+- **Spring Boot** (REST, Data JPA)  
+- **Hibernate/JPA**  
+- **MySQL** (or H2 for in-memory testing)  
+- **Maven** (build tool)  
+
+---
+
+## 📂 Project Structure  
