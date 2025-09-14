@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Expense Tracker App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 20px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #444;
+        }
+
+        input {
+            width: 95%;
+            padding: 8px;
+            margin: 6px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 6px 4px 0 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #logout-button {
+          background: #e74c3c;
+          color: white;
+          float: right;          
+          margin: 10px 20px 0 0;     
+          padding: 8px 14px;
+          border-radius: 6px;
+        }
+        #logout-button:hover { background: #c0392b; }
+
+        #createExpense {
+            background: #4CAF50;
+            color: white;
+        }
+        #createExpense:hover { background: #45a049; }
+
+        #listExpenses {
+            background: #007BFF;
+            color: white;
+        }
+        #listExpenses:hover { background: #0069d9; }
+
+        /* Expense cards container */
+        #expenses {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .expense {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .expense strong {
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        .del {
+            background: #e74c3c;
+            color: white;
+        }
+        .del:hover { background: #c0392b; }
+
+        .edit {
+            background: #f39c12;
+            color: white;
+        }
+        .edit:hover { background: #e67e22; }
+    </style>
+</head>
+<body>
+    <h2>Expense Tracker</h2>
+    <button id='logout-button'>Logout</button>
+
+    <!-- Create Expense Container -->
+    <div class="container">
+        <h3>Create Expense</h3>
+        Amount: <input id="amount"><br>
+        Description: <input id="desc"><br>
+        Date: <input id="date" type="date"><br>
+        Category: <input id="cat"><br>
+        <button id="createExpense">Create</button>
+    </div>
+
+    <!-- Expenses Container -->
+    <div class="container">
+        <h3>Expenses</h3>
+        <button id="listExpenses">Load</button>
+        <div id="expenses"></div>
+    </div>
+
+<script>
+    const baseUrl = "http://localhost:8080";
+    const jwtToken = localStorage.getItem("jwtToken");
+    if (!jwtToken) window.location.href="index.html";
+
+    //Logout
+    document.getElementById('logout-button').addEventListener('click', () => {
+      if(jwtToken) {
+        localStorage.removeItem("jwtToken");
+        window.location.href="index.html";
+      }
+    });
+
+    //Create Expense
+    document.getElementById('createExpense').addEventListener('click', async () => {  
+      if (!jwtToken) window.location.href="index.html";
+
+      const amount = parseFloat(document.getElementById('amount').value);
+      const description = document.getElementById('desc').value;
+      const date = document.getElementById('date').value || new Date().toISOString().slice(0,10);
+      const category = document.getElementById('cat').value;
+
+      const res = await fetch(baseUrl + '/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': 'Bearer ' + jwtToken
+        },
+        body: JSON.stringify({amount, description, date, category})
+      });
+      if (res.ok) {
+        alert('Created');
+        loadExpenses();
+      } else {
+        alert('Error: ' + await res.text());
+      }
+    });
+
+    //Load Expenses
+    async function loadExpenses() {
+      if (!jwtToken) window.location.href="index.html";
+
+      const res = await fetch(baseUrl + '/api/expenses', {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + jwtToken }
+      });
+
+      const list = await res.json();
+      const container = document.getElementById('expenses');
+      container.innerHTML = '';
+      list.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'expense';
+        div.innerHTML = `
+          <strong>${e.category || ''}</strong> - ${e.amount} (${e.date}) <br>
+          ${e.description || ''} <br>
+          <button data-id="${e.id}" class="del">Delete</button>
+          <button data-id="${e.id}" class="edit">Edit</button>
+        `;
+        container.appendChild(div);
+      });
+
+      //Delete expense
+      document.querySelectorAll('.del').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = ev.target.dataset.id;
+          await fetch(baseUrl + '/api/expenses/' + id, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + jwtToken }
+          });
+          loadExpenses();
+        });
+      });
+
+      //Edit Expense
+      document.querySelectorAll('.edit').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = ev.target.dataset.id;
+          const newAmount = prompt('New amount?');
+          const newDesc = prompt('New description?');
+          await fetch(baseUrl + '/api/expenses/' + id, {
+            method: 'PUT',
+            headers: {
+              'Authorization': 'Bearer ' + jwtToken,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount: parseFloat(newAmount), description: newDesc })
+          });
+          loadExpenses();
+        });
+      });
+    }
+
+    document.getElementById('listExpenses').addEventListener('click', loadExpenses);
+</script>
+</body>
+</html>

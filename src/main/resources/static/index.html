@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Expense Tracker App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: left;
+      width: 300px;
+    }
+
+    h3 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.6rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #login {
+      background: #4CAF50;
+      color: white;
+      margin-bottom: 1rem;
+    }
+
+    #login:hover {
+      background: #45a049;
+    }
+
+    #register {
+      background: #007BFF;
+      color: white;
+    }
+
+    #register:hover {
+      background: #0069d9;
+    }
+
+    span {
+      margin-top: 2rem;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    #tokenArea {
+      margin-top: 1rem;
+      color: #444;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+      <h3>Create Account</h3>
+      Email: <input id="email" required><br>
+      Password: <input id="password" type="password" required><br>
+      <button id="login">Login</button>
+      <span>Don't have an account?</span>
+      <button id="register">Register</button>
+      <div id="tokenArea"></div>
+  </div>
+
+<script>
+    const baseUrl = "http://localhost:8080"; 
+    
+    //if already logged in go to home
+    const jwtToken = localStorage.getItem("jwtToken");
+    if(jwtToken) window.location.href="homepage.html";
+
+    //Save token to localstorage
+    function setToken(token) {
+      if(token) {
+        localStorage.setItem("jwtToken", token);
+      } else {
+        localStorage.removeItem("jwtToken");
+      }
+    }
+
+    //Register
+   document.getElementById('register').addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if(email != null && password != null) {
+            const res = await fetch(baseUrl + '/api/auth/register', {
+            method: 'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({email, password})
+            });
+
+            const body = await res.json();
+            if (res.ok) { 
+              setToken(body.token);
+              window.location.href="homepage.html";
+            } else {         
+              alert(JSON.stringify(body));
+            }
+        } else {
+            alert('Enter both email and password');
+        }
+    });
+
+    //Login
+    document.getElementById('login').addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if(email != null && password != null) {
+        const res = await fetch(baseUrl + '/api/auth/login', {
+          method: 'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({email, password})
+        });
+        
+        const body = await res.json();
+        if (res.ok) { 
+          setToken(body.token);
+          window.location.href="homepage.html";
+         } else {
+            alert(JSON.stringify(body));
+        }
+      } else {
+          alert('Enter both email and password');
+        }
+    });
+  </script>
+  </body>
+</html>
+
+
