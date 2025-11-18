@@ -20,7 +20,7 @@ This backend application demonstrates how to build and structure APIs using **Ja
 - **Spring Boot** (REST, Data JPA)
 - **HTML, CSS, JavaScript**
 - **Hibernate/JPA**  
-- **MySQL** (or H2 for in-memory testing)  
+- **MySQL** 
 - **Maven** (build tool)  
 
 ---
